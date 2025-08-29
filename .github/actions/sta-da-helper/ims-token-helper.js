@@ -78,7 +78,7 @@ export async function getAccessTokenWithFallback() {
     clientId = clientId.trim();
     clientSecret = clientSecret.trim();
     serviceToken = serviceToken.trim();
-    core.info(`Exchanging IMS client credentials for access token.`);
+    core.info(`IMS token not found. Using IMS client credentials as fallback.`);
     accessToken = await getAccessToken(clientId, clientSecret, serviceToken);
   } else {
     // 3) Final fallback: proceed without token
