@@ -16,8 +16,8 @@ import jwt from 'jsonwebtoken';
 import { AEM_HELPER_OPERATIONS } from './sta-aem-helper-constants.js';
 import { doPreviewPublish, deletePreviewPublish } from './aem-preview-publish.js';
 
-// Import the getAccessToken function from sta-da-helper
-import { getAccessToken } from '../sta-da-helper/sta-da-helper.js';
+// Import the shared IMS token helper
+import { getAccessTokenWithFallback } from '../sta-da-helper/ims-token-helper.js';
 
 /**
  * Fetches an Adobe IMS access token using JWT authentication.
@@ -223,29 +223,8 @@ async function run() {
       const context = core.getInput('context');
       const pages = JSON.parse(pagesInput);
       
-      // Prefer pre-issued IMS token when provided via repo secrets
-      const imsToken = process.env.IMS_TOKEN;
-      // DA IMS credentials for token exchange (fallback)
-      let clientId = process.env.DA_CLIENT_ID;
-      let clientSecret = process.env.DA_CLIENT_SECRET;
-      let serviceToken = process.env.DA_SERVICE_TOKEN;
-
-      let accessToken = null;
-      // 1) Use IMS token secret if provided
-      if (imsToken && imsToken.trim().length > 0) {
-        accessToken = imsToken.trim();
-        core.info('Using IMS token from secrets.');
-      } else if (clientId && clientSecret && serviceToken) {
-        // 2) Fallback: exchange DA_* secrets for access token
-        clientId = clientId.trim();
-        clientSecret = clientSecret.trim();
-        serviceToken = serviceToken.trim();
-        core.info('Exchanging IMSS client credentials for access token.');
-        accessToken = await getAccessToken(clientId, clientSecret, serviceToken);
-      } else {
-        // 3) Final fallback: proceed without token
-        core.warning('No IMS token, or DA IMS client credentials found. Proceeding without token.');
-      }
+      // Get access token with fallback logic
+      const accessToken = await getAccessTokenWithFallback();
 
       if (operation === AEM_HELPER_OPERATIONS.DELETE_PREVIEW_AND_PUBLISH) {
         await deletePreviewPublish(pages, context, accessToken);
