@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .cards > ul {
   list-style: none;
   margin: 0;
@@ -24,4 +25,222 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+}
+
+
+.cards.cards4 {
+  background: #f6f6f0;
+  border-radius: 24px;
+  padding: 64px 64px 88px; /* extra bottom padding for airiness */
+  max-width: 1200px;
+  margin: 40px auto;
+  box-sizing: border-box;
+}
+
+/* Use grid for the outer structure: two columns, with right column content vertically centered */
+.cards.cards4 > ul {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 40px 48px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  list-style: none;
+  align-items: center; /* vertically center columns */
+  min-height: 600px; /* ensures enough vertical space for centering */
+}
+
+/* Remove default spacing from list items */
+.cards.cards4 > ul > li {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 0;
+}
+
+/* Left column: first card (hero) */
+.cards.cards4 > ul > li:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  justify-content: flex-start;
+}
+
+.cards.cards4 > ul > li:nth-child(1) .cards-card-image img {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 22px;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 4/3;
+  margin-bottom: 0;
+}
+
+.cards.cards4 > ul > li:nth-child(1) .cards-card-body {
+  margin: 0;
+  padding-top: 18px;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cards.cards4 > ul > li:nth-child(1) .cards-card-body p:first-of-type {
+  font-size: 1.08rem;
+  opacity: 0.95;
+  margin-bottom: 8px;
+  margin-top: 0;
+  letter-spacing: 0.04em;
+  color: #222;
+}
+
+.cards.cards4 > ul > li:nth-child(1) .cards-card-body h3 {
+  font-size: 2.3rem;
+  font-weight: 400;
+  color: #222;
+  margin: 0 0 16px;
+  line-height: 1.13;
+  letter-spacing: 0.01em;
+}
+
+.cards.cards4 > ul > li:nth-child(1) .cards-card-body p:not(:first-of-type) {
+  color: #222;
+  font-size: 1.08rem;
+  margin: 0;
+  opacity: 0.94;
+  line-height: 1.5;
+}
+
+/* Right column: stack all cards after the first in a vertical group */
+.cards.cards4 > ul > li:nth-child(n+2) {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Group right column content for better vertical centering and spacing */
+.cards.cards4 > ul > li:nth-child(2) {
+  margin-bottom: 38px;
+  grid-row: 1;
+}
+
+.cards.cards4 > ul > li:nth-child(2) .cards-card-image img {
+  border-radius: 18px;
+  width: 100%;
+  max-width: 230px;
+  object-fit: cover;
+  aspect-ratio: 4/3;
+  margin-bottom: 0;
+}
+
+.cards.cards4 > ul > li:nth-child(2) .cards-card-body {
+  margin: 0;
+  color: #222;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cards.cards4 > ul > li:nth-child(2) .cards-card-body p:first-of-type {
+  font-size: 1.07rem;
+  opacity: 0.93;
+  margin-bottom: 6px;
+  margin-top: 0;
+  color: #222;
+}
+
+.cards.cards4 > ul > li:nth-child(2) .cards-card-body h3 {
+  font-size: 1.22rem;
+  font-weight: 400;
+  color: #222;
+  margin: 0 0 10px;
+  letter-spacing: 0.01em;
+}
+
+.cards.cards4 > ul > li:nth-child(2) .cards-card-body p:not(:first-of-type) {
+  color: #222;
+  font-size: 1.0rem;
+  opacity: 0.92;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Cards 3+: faded list style, stack vertically below card 2 with relaxed spacing */
+.cards.cards4 > ul > li:nth-child(n+3) {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  grid-row: auto;
+}
+
+.cards.cards4 > ul > li:nth-child(n+3) .cards-card-body {
+  margin: 0;
+  color: #444;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cards.cards4 > ul > li:nth-child(n+3) .cards-card-body h3 {
+  font-size: 1.13rem;
+  font-weight: 400;
+  color: #868686;
+  opacity: 0.66;
+  margin: 0 0 2px;
+  letter-spacing: 0.01em;
+}
+
+.cards.cards4 > ul > li:nth-child(n+3) .cards-card-body p {
+  color: #868686;
+  font-size: 1.02rem;
+  opacity: 0.61;
+  margin: 0 0 7px;
+  line-height: 1.3;
+}
+
+/* Responsive: stack columns/items on small screens */
+@media (width <= 900px) {
+  .cards.cards4 {
+    padding: 24px 0 32px;
+    border-radius: 0;
+  }
+
+  .cards.cards4 > ul {
+    grid-template-columns: 1fr;
+    gap: 32px 0;
+    align-items: flex-start;
+    min-height: 0;
+  }
+
+  .cards.cards4 > ul > li {
+    grid-column: 1;
+    max-width: 100%;
+  }
+
+  .cards.cards4 > ul > li:nth-child(n+2) {
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+
+  .cards.cards4 > ul > li:nth-child(1) .cards-card-image img,
+  .cards.cards4 > ul > li:nth-child(2) .cards-card-image img {
+    max-width: 100%;
+  }
+}
+
+.cards.cards4 img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-width: 100%;
+  border-radius: inherit;
 }
