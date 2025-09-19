@@ -27,15 +27,24 @@ env:
   DA_SERVICE_TOKEN: ${{ secrets.DA_SERVICE_TOKEN }}
   IMS_TOKEN: ${{ secrets.IMS_TOKEN }}
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
 jobs:
   backup-and-reset:
     runs-on: ubuntu-latest
     steps:
-      - name: Ensure WORKFLOW_PAT secret is set
+      - name: Check token availability
         run: |
-          if [ -z "${{ secrets.WORKFLOW_PAT }}" ]; then
-            echo "❌ The secret WORKFLOW_PAT is not set in your repository."
-            exit 1
+          if [ -n "${{ secrets.WORKFLOW_PAT }}" ]; then
+            echo "✅ Using WORKFLOW_PAT for enhanced permissions"
+            echo "token_to_use=${{ secrets.WORKFLOW_PAT }}" >> $GITHUB_ENV
+          else
+            echo "⚠️ WORKFLOW_PAT not set, using GITHUB_TOKEN (may have limitations)"
+            echo "token_to_use=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
           fi
 
       - name: Checkout repository
@@ -43,7 +52,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
-          token: ${{ secrets.WORKFLOW_PAT }}
+          token: ${{ env.token_to_use }}
 
       - name: Set up Git
         run: |
@@ -236,7 +245,7 @@ jobs:
       - name: Create AEMY Installation issue
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.WORKFLOW_PAT }}
+          github-token: ${{ env.token_to_use }}
           script: |
             const { data: issue } = await github.rest.issues.create({
               owner: context.repo.owner,
