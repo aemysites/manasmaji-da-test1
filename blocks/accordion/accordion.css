@@ -1,8 +1,8 @@
+/* stylelint-disable no-descending-specificity */
 .accordion details {
   border: 1px solid #dadada;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .accordion details + details {
   margin-top: 24px;
 }
@@ -58,4 +58,127 @@
 .accordion details[open] .accordion-item-body {
   border-top: 1px solid #dadada;
   background-color: var(--background-color);
+}
+
+
+.accordion.accordion8 {
+  background: #FAFBF8;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Use grid for robust two-column Q&A layout */
+.accordion.accordion8 .accordion-item {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  align-items: start;
+  width: 100%;
+  margin: 0;
+  padding: 32px 0;
+  border: none;
+  background: none;
+  box-sizing: border-box;
+}
+
+/* Ensure space between columns */
+.accordion.accordion8 .accordion-item-label {
+  margin: 0;
+  padding: 0;
+  color: #F7F8F6;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  min-width: 180px;
+}
+
+/* Question text styles */
+.accordion.accordion8 .accordion-item-label p {
+  margin: 0;
+  color: #F7F8F6;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+}
+
+/* Hide summary marker and interactivity */
+.accordion.accordion8 summary {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  cursor: default;
+  outline: none;
+  list-style: none;
+  width: 100%;
+  color: #F7F8F6;
+  pointer-events: none;
+}
+
+.accordion.accordion8 summary::-webkit-details-marker,
+.accordion.accordion8 summary::after {
+  display: none;
+}
+
+.accordion.accordion8 summary:hover,
+.accordion.accordion8 summary:focus {
+  background: none;
+  cursor: default;
+}
+
+/* Make sure answers always appear and align to right column */
+.accordion.accordion8 .accordion-item-body {
+    padding-top: 16px;
+  }
+
+/* Ensure answers are always visible regardless of details state */
+.accordion.accordion8 details .accordion-item-body {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  position: static;
+  height: auto;
+  width: auto;
+}
+
+/* Answer text styles */
+.accordion.accordion8 .accordion-item-body p {
+  margin: 0;
+  color: #F7F8F6;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Remove vertical gap between .accordion-item rows */
+.accordion.accordion8 .accordion-item + .accordion-item {
+  margin-top: 0;
+}
+
+/* Responsive: Stack columns on small screens */
+@media (width <= 700px) {
+  .accordion.accordion8 .accordion-item {
+    grid-template-columns: 1fr;
+    padding: 24px 0;
+  }
+
+  .accordion.accordion8 .accordion-item-label,
+  .accordion.accordion8 .accordion-item-body {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .accordion.accordion8 .accordion-item-body {
+    padding-top: 16px;
+  }
 }
