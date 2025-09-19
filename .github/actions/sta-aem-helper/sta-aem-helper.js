@@ -16,8 +16,8 @@ import jwt from 'jsonwebtoken';
 import { AEM_HELPER_OPERATIONS } from './sta-aem-helper-constants.js';
 import { doPreviewPublish, deletePreviewPublish } from './aem-preview-publish.js';
 
-// Import the shared IMS token helper
-import { getAccessTokenWithFallback } from '../sta-da-helper/ims-token-helper.js';
+// Import the local IMS token helper
+import { getAccessTokenWithFallback } from './ims-token-helper.js';
 
 /**
  * Fetches an Adobe IMS access token using JWT authentication.
