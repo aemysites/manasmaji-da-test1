@@ -1,0 +1,33 @@
+{
+  "originUrl": "https://www.wknd-trendsetters.site",
+  "aborted": false,
+  "urls": [
+    {
+      "url": "https://www.wknd-trendsetters.site/blog/fashion-blog-post",
+      "source": "MANUAL",
+      "targetPath": "/blog/fashion-blog-post",
+      "id": "9b4d89f80efba6f8dbcb1e3da8ea8ffa8771a959"
+    },
+    {
+      "url": "https://www.wknd-trendsetters.site/faq",
+      "source": "MANUAL",
+      "targetPath": "/faq",
+      "id": "429d6f000c5a6e38a121160bf56d01b17365cffe"
+    }
+  ],
+  "lastCrawled": "MANUAL",
+  "crawlOptions": {
+    "timeout": 64800000,
+    "inclusionPatterns": [],
+    "exclusionPatterns": [],
+    "limit": 100,
+    "sameDomain": true,
+    "keepHash": false,
+    "strategy": "manual",
+    "strategiesAttempted": [
+      "MANUAL"
+    ]
+  },
+  "extractionErrors": [],
+  "errorCountMessage": "none"
+}
