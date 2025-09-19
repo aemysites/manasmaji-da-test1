@@ -11,6 +11,10 @@ on:
         description: 'Root mountpoint (required)'
         required: true
         type: string
+      project_type:
+        description: 'Project type (sharepoint or da) - auto-detected if not provided'
+        required: false
+        type: string
 
 env:
   AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
@@ -18,6 +22,10 @@ env:
   AZURE_PRIVATE_KEY_BASE64: ${{ secrets.AZURE_PRIVATE_KEY_BASE64 }}
   AZURE_PFX_PASSWORD: ${{ secrets.AZURE_PFX_PASSWORD }}
   AZURE_THUMBPRINT: ${{ secrets.AZURE_THUMBPRINT }}
+  DA_CLIENT_ID: ${{ secrets.DA_CLIENT_ID }}
+  DA_CLIENT_SECRET: ${{ secrets.DA_CLIENT_SECRET }}
+  DA_SERVICE_TOKEN: ${{ secrets.DA_SERVICE_TOKEN }}
+  IMS_TOKEN: ${{ secrets.IMS_TOKEN }}
 
 jobs:
   backup-and-reset:
@@ -50,10 +58,36 @@ jobs:
           npm install
           cd ../sta-sp-move-to-backup
           npm install
+          cd ../sta-da-move-to-backup
+          npm install
           cd ../sta-aem-helper
           npm install
 
+      - name: Detect project type and setup authentication
+        id: project-setup
+        run: |
+          # Determine project type from input or mountpoint
+          PROJECT_TYPE="${{ inputs.project_type }}"
+          MOUNTPOINT="${{ inputs.root_mountpoint }}"
+          
+          if [ -z "$PROJECT_TYPE" ]; then
+            # Auto-detect project type from mountpoint
+            if [[ "$MOUNTPOINT" == *".sharepoint.com"* ]]; then
+              PROJECT_TYPE="sharepoint"
+            elif [[ "$MOUNTPOINT" == *".da.live"* ]] || [[ "$MOUNTPOINT" == *"da.adobe.com"* ]]; then
+              PROJECT_TYPE="da"
+            else
+              echo "❌ Cannot auto-detect project type from mountpoint: $MOUNTPOINT"
+              echo "Please specify project_type input (sharepoint or da)"
+              exit 1
+            fi
+          fi
+          
+          echo "project_type=$PROJECT_TYPE" >> $GITHUB_OUTPUT
+          echo "✅ Detected project type: $PROJECT_TYPE"
+
       - name: Create Azure Access Token
+        if: steps.project-setup.outputs.project_type == 'sharepoint'
         uses: ./.github/actions/sta-azure-helper
         id: azure-auth
         with:
@@ -90,7 +124,66 @@ jobs:
           paths=$(echo "$urls" | awk -F, '{for(i=1;i<=NF;i++){gsub(/^ +| +$/,"",$i); printf "\"%s\"%s", $i, (i<NF?",":"")}}')
           echo "paths=[$paths]" >> $GITHUB_OUTPUT
 
-      - name: Delete SharePoint previews and publish
+      - name: Parse SharePoint mountpoint
+        if: steps.project-setup.outputs.project_type == 'sharepoint'
+        id: mountpoint_data
+        uses: ./.github/actions/sta-mountpoint
+        with:
+          mountpoint: ${{ inputs.root_mountpoint }}
+          mountpoint_type: 'sharepoint'
+
+      - name: Parse DA mountpoint
+        if: steps.project-setup.outputs.project_type == 'da'
+        id: da_mountpoint_data
+        run: |
+          MOUNTPOINT="${{ inputs.root_mountpoint }}"
+          # Extract org and repo from DA URL
+          # Expected format: https://content.da.live/org/repo
+          if [[ "$MOUNTPOINT" == https://content.da.live/* ]]; then
+            # Remove the base URL and trailing slash
+            path_part="${MOUNTPOINT#https://content.da.live/}"
+            path_part="${path_part%/}"
+            
+            # Extract org and repo using parameter expansion
+            ORG="${path_part%%/*}"
+            REPO="${path_part#*/}"
+            
+            # Validate we have both org and repo
+            if [[ -n "$ORG" && -n "$REPO" && "$ORG" != "$REPO" ]]; then
+              echo "org=$ORG" >> $GITHUB_OUTPUT
+              echo "repo=$REPO" >> $GITHUB_OUTPUT
+              echo "✅ Parsed DA mountpoint - Org: $ORG, Repo: $REPO"
+            else
+              echo "❌ Invalid DA mountpoint format: $MOUNTPOINT"
+              echo "Expected format: https://content.da.live/org/repo"
+              exit 1
+            fi
+          else
+            echo "❌ Invalid DA mountpoint format: $MOUNTPOINT"
+            echo "Expected format: https://content.da.live/org/repo"
+            exit 1
+          fi
+
+      - name: Move SharePoint content to backup folder
+        if: steps.project-setup.outputs.project_type == 'sharepoint'
+        id: move-to-backup-sp
+        uses: ./.github/actions/sta-sp-move-to-backup
+        with:
+          token: ${{ steps.azure-auth.outputs.access_token }}
+          host: ${{ fromJSON(steps.mountpoint_data.outputs.data).host }}
+          site_path: ${{ fromJSON(steps.mountpoint_data.outputs.data).site }}
+          folder_path: ${{ fromJSON(steps.mountpoint_data.outputs.data).path }}
+
+      - name: Move DA content to backup folder
+        if: steps.project-setup.outputs.project_type == 'da'
+        id: move-to-backup-da
+        uses: ./.github/actions/sta-da-move-to-backup
+        with:
+          org: ${{ steps.da_mountpoint_data.outputs.org }}
+          repo: ${{ steps.da_mountpoint_data.outputs.repo }}
+          path: ""
+
+      - name: Delete previews and publish
         id: delete-previews
         uses: ./.github/actions/sta-aem-helper
         with:
@@ -98,22 +191,6 @@ jobs:
             {"project": {"owner": "${{ github.repository_owner }}", "repo": "${{ github.event.repository.name }}", "branch": "main"}}
           pages: ${{ steps.convert_urls_to_paths.outputs.paths }}
           operation: deletePreviewAndPublish
-
-      - name: Parse mountpoint
-        id: mountpoint_data
-        uses: ./.github/actions/sta-mountpoint
-        with:
-          mountpoint: ${{ inputs.root_mountpoint }}
-          mountpoint_type: 'sharepoint'
-
-      - name: Move SharePoint content to backup folder
-        id: move-to-backup
-        uses: ./.github/actions/sta-sp-move-to-backup
-        with:
-          token: ${{ steps.azure-auth.outputs.access_token }}
-          host: ${{ fromJSON(steps.mountpoint_data.outputs.data).host }}
-          site_path: ${{ fromJSON(steps.mountpoint_data.outputs.data).site }}
-          folder_path: ${{ fromJSON(steps.mountpoint_data.outputs.data).path }}
 
       - name: Create backup branch
         id: backup
